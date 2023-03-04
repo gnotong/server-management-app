@@ -1,0 +1,34 @@
+<h1>SERVERS</h1>
+
+<div *ngIf="servers!.length > 0; then serversList; else noServers"></div>
+<ng-template #serversList>
+  <ul class="list-group">
+    <li class="list-group-item" *ngFor="let serv of servers">
+      {{ serv.name }}: {{ serv.ipAddress }}
+      <button class="btn btn-info" (click)="showServer(serv.id)">Show</button>
+    </li>
+    <li class="list-group-item">
+      {{ 'babab' }}: {{ '127.0.0.1' }}
+      <button class="btn btn-info" (click)="getServer(127)">Show</button>
+    </li>
+    
+  </ul>
+</ng-template>
+
+<ng-template #noServers>
+  <div class="alert alert-warning">
+    <strong>No servers found.</strong>
+  </div>  
+</ng-template>
+
+<h2>SELECTED SERVER</h2>
+<div *ngIf="server; then serverTemp; else noServer"></div>
+<ng-template #serverTemp>
+  <div>{{ server | json }}</div>
+</ng-template>
+<ng-template #noServer>
+  <div class="alert alert-warning">
+    <strong>No server selected.</strong>
+  </div>  
+</ng-template>
+
