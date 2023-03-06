@@ -83,7 +83,6 @@ export class ServerComponent implements OnInit {
       width: '500px',
       data: { title: 'New Server'},
     }).afterClosed().subscribe((data: Server) => {
-      data.status = Status.SERVER_DOWN;
       this.createNewServer(data);
     })
   }

@@ -1,7 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
   <div class="form-group mb-3">
       <label for="name">Name</label>
-      <input matInput formControlName="name" class="form-control" />
+      <input formControlName="name" class="form-control" />
       <div *ngIf="name && name.touched && name.errors">
         <mat-error *ngIf="name.errors['required']">
           Name is required
@@ -15,7 +15,7 @@
 
   <div class="form-group mt-3 mb-3">
       <label for="ipAddress">IP Address</label>
-      <input matInput formControlName="ipAddress" class="form-control" />
+      <input formControlName="ipAddress" class="form-control" />
       <div *ngIf="ipAddress && ipAddress.touched && ipAddress.errors">
         <mat-error *ngIf="ipAddress.errors['required']">
           IP Address is required
@@ -29,7 +29,7 @@
 
   <div class="form-group mt-3 mb-3">
       <label for="type">Server type</label>
-      <input matInput formControlName="type" class="form-control" />
+      <input formControlName="type" class="form-control" />
       <div *ngIf="type && type.touched && type.errors">
         <mat-error *ngIf="type.errors['required']">
           Server type is required
@@ -43,7 +43,7 @@
 
   <div class="form-group mt-3 mb-3">
       <label for="memory">Server RAM size</label>
-      <input matInput formControlName="memory" class="form-control" />
+      <input formControlName="memory" class="form-control" />
       <div *ngIf="memory && memory.touched && memory.errors">
         <mat-error *ngIf="memory.errors['required']">
           Server RAM size is required
@@ -54,6 +54,8 @@
         </mat-error>
       </div>
   </div>
+
+  <input hidden="true" formControlName="status" class="form-control" />
 
   <button type="button" class="btn btn-light" (click)="cancel()">Cancel</button>
   <button
