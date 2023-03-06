@@ -1,0 +1,64 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <div class="form-group mb-3">
+      <label for="name">Name</label>
+      <input matInput formControlName="name" class="form-control" />
+      <div *ngIf="name && name.touched && name.errors">
+        <mat-error *ngIf="name.errors['required']">
+          Name is required
+        </mat-error>
+        <mat-error *ngIf="name?.errors!['minlength']">
+            Username minimum length is
+            {{ name.errors["minlength"].requiredLength }}
+        </mat-error>
+      </div>
+  </div>
+
+  <div class="form-group mt-3 mb-3">
+      <label for="ipAddress">IP Address</label>
+      <input matInput formControlName="ipAddress" class="form-control" />
+      <div *ngIf="ipAddress && ipAddress.touched && ipAddress.errors">
+        <mat-error *ngIf="ipAddress.errors['required']">
+          IP Address is required
+        </mat-error>
+        <mat-error *ngIf="ipAddress.errors['minlength']">
+            IP Address minimum length is
+            {{ ipAddress.errors["minlength"].requiredLength }}
+        </mat-error>
+      </div>
+  </div>
+
+  <div class="form-group mt-3 mb-3">
+      <label for="type">Server type</label>
+      <input matInput formControlName="type" class="form-control" />
+      <div *ngIf="type && type.touched && type.errors">
+        <mat-error *ngIf="type.errors['required']">
+          Server type is required
+        </mat-error>
+        <mat-error *ngIf="type.errors['minlength']">
+            Server type minimum length is
+            {{ type.errors["minlength"].requiredLength }}
+        </mat-error>
+      </div>
+  </div>
+
+  <div class="form-group mt-3 mb-3">
+      <label for="memory">Server RAM size</label>
+      <input matInput formControlName="memory" class="form-control" />
+      <div *ngIf="memory && memory.touched && memory.errors">
+        <mat-error *ngIf="memory.errors['required']">
+          Server RAM size is required
+        </mat-error>
+        <mat-error *ngIf="memory.errors['minlength']">
+            Server RAM minimum length is
+            {{ memory.errors["minlength"].requiredLength }}
+        </mat-error>
+      </div>
+  </div>
+
+  <button type="button" class="btn btn-light" (click)="cancel()">Cancel</button>
+  <button
+    class="btn btn-primary"
+    type="submit"
+    [disabled]="form.invalid"
+  >Create</button>
+</form>

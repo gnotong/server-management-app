@@ -40,9 +40,15 @@ export class ServerService {
       .pipe(catchError(this.handleError));
   }
 
+  updateServer(server: Server): Observable<CustomResponse> {
+    return this.http
+      .put<CustomResponse>(this.baseUrl + `/api/servers${server.id}`, server)
+      .pipe(catchError(this.handleError));
+  }
+
   private handleError(error: Response) {
     if (error.status == 404) {
-      return throwError(() => new NotFoundError('Servers list not found'));
+      return throwError(() => new NotFoundError('Server not found'));
     }
 
     return throwError(() => new AppError(error));

@@ -6,8 +6,8 @@ export interface CustomResponse{
     timeStamp: Date;
     statusCode: number;
     status: Status;
-    reason: string;
+    reason?: string;
     message: string;
     developerMessage: string;
-    data: ResponseData;
+    data?: ResponseData;
 }

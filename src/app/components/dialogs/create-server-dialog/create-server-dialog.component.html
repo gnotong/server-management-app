@@ -1,0 +1,8 @@
+<h2 mat-dialog-title><strong>{{ data.title }}</strong> </h2>
+<hr>
+<mat-dialog-content>
+  <create-server-form
+    (createServerFormSubmitEvent)="onSubmit($event)"
+    (createServerFormCancelEvent)="onCancel()"
+  ></create-server-form>
+</mat-dialog-content>
