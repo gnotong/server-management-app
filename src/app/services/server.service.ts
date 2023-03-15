@@ -1,6 +1,12 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  catchError, map,
+  Observable,
+  tap,
+  throwError
+} from 'rxjs';
 import { AppError } from '../errors/app.error';
 import { NotFoundError } from '../errors/not-found.error';
 import { CustomResponse } from '../models/custom-response.interface';
@@ -14,30 +20,58 @@ const LIMIT = 10;
 export class ServerService {
   private readonly baseUrl: string = 'http://localhost:8080';
 
-  constructor(private readonly http: HttpClient) {}
+  private serversSubject = new BehaviorSubject<Server[]>([]);
+  servers$: Observable<Server[]> = this.serversSubject.asObservable();
 
-  getServers(): Observable<CustomResponse> {
-    return this.http
+  constructor(private readonly http: HttpClient) {
+    this.loadServers();
+  }
+
+  private loadServers(): void {
+    this.http
       .get<CustomResponse>(this.baseUrl + `/api/servers?limit=${LIMIT}`)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        catchError(this.handleError),
+        map((response) => response.data.servers ?? []),
+        tap((servers) => this.serversSubject.next(servers))
+      )
+      .subscribe();
   }
 
-  getServer(id: number): Observable<CustomResponse> {
+  deleteServer(id: number): Observable<Boolean> {
     return this.http
-      .get<CustomResponse>(this.baseUrl + `/api/servers/${id}`)
-      .pipe(catchError(this.handleError));
-  }
- 
-  deleteServer(id: number): Observable<CustomResponse> {
-    return this.http
-    .delete<CustomResponse>(this.baseUrl + `/api/servers/${id}`)
-    .pipe(catchError(this.handleError));
+      .delete<CustomResponse>(this.baseUrl + `/api/servers/${id}`)
+      .pipe(
+        map((response) => response.data.deleted ?? false),
+        tap({
+          next: (deleted) => {
+            if (deleted) {
+              const servers = this.serversSubject.value;
+              const updatedServers = servers?.filter(
+                (server) => server.id !== id
+              );
+              this.serversSubject.next(updatedServers);
+            }
+          },
+        }),
+        catchError(this.handleError)
+      );
   }
 
-  createServer(server?: Server): Observable<CustomResponse> {
+  createServer(server?: Server): Observable<Server | null> {
     return this.http
       .post<CustomResponse>(this.baseUrl + `/api/servers`, server)
-      .pipe(catchError(this.handleError));
+      .pipe(
+        map((response) => response.data.server ?? null),
+        tap((serv) => {
+          if (serv) {
+            const servers = this.serversSubject.value;
+            servers?.push(serv);
+            this.serversSubject.next(servers);
+          }
+        }),
+        catchError(this.handleError)
+      );
   }
 
   updateServer(server: Server): Observable<CustomResponse> {
@@ -46,11 +80,11 @@ export class ServerService {
       .pipe(catchError(this.handleError));
   }
 
-  private handleError(error: Response) {
-    if (error.status == 404) {
-      return throwError(() => new NotFoundError('Server not found'));
+  private handleError(response: HttpErrorResponse) {
+    if (response.status == 404) {
+      return throwError(() => new NotFoundError(response.error?.message));
     }
 
-    return throwError(() => new AppError(error));
+    return throwError(() => new AppError(response.error?.message));
   }
 }

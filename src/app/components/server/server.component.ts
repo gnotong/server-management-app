@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Status } from 'src/app/enums/status.enum';
+import { ToastrService } from 'ngx-toastr';
+import { Observable, of, tap } from 'rxjs';
 import { AppError } from 'src/app/errors/app.error';
-import { CustomResponse } from 'src/app/models/custom-response.interface';
 import { Server } from 'src/app/models/server.interface';
 import { ServerService } from 'src/app/services/server.service';
+import { ConfirmationDialogComponent } from '../dialogs/confirmation-dialog/confirmation-dialog.component';
 import { CreateServerDialogComponent } from '../dialogs/create-server-dialog/create-server-dialog.component';
 
 @Component({
@@ -13,50 +14,18 @@ import { CreateServerDialogComponent } from '../dialogs/create-server-dialog/cre
   styleUrls: ['./server.component.css'],
 })
 export class ServerComponent implements OnInit {
-  servers: Server[] = [];
-  server: Server | undefined;
+  servers$!: Observable<Server[] | undefined>;
 
   constructor(
     private readonly service: ServerService,
-    private readonly dialog: MatDialog
+    private readonly dialog: MatDialog,
+    private readonly toastrService: ToastrService
   ) {}
 
   ngOnInit(): void {
-    this.service.getServers().subscribe({
-      next: (response: CustomResponse) => {
-        this.servers = response.data?.servers ?? [];
-      },
-      error: (error: AppError) => {
-        console.log(error.originalError);
-      },
-    });
-  }
-
-  showServer(serverId: number) {
-    this.server = this.servers?.find((s) => s.id === serverId);
-  }
-
-  createNewServer(data: Server) {
-    this.service.createServer(data).subscribe({
-      next: (response: CustomResponse) => {
-        const data = response.data;
-        if (data?.server) {
-          this.servers.push(data.server);
-          // todo: popup to show that everything is ok
-        }
-      },
-      error: (error: AppError) => {
-        // todo: popup to show that everything is !ok
-        // make sure to refill the server form with the data when the add button is clicked once again
-        console.log(error.originalError);
-      }
-    });
-  }
-
-  getServer(serverId: number) {
-    return this.service.getServer(serverId).subscribe({
-      next: (response: CustomResponse) => {
-        this.server = response.data?.server;
+    this.service.servers$.subscribe({
+      next: (servers) => {
+        this.servers$ = of(servers);
       },
       error: (error: AppError) => {
         console.log(error.originalError);
@@ -65,25 +34,60 @@ export class ServerComponent implements OnInit {
   }
 
   deleteServer(server: Server) {
-    let index = this.servers.findIndex((s) => s.id === server.id);
-    this.servers.splice(index, 1);
-    return this.service.deleteServer(server.id).subscribe({
-      next: (response: CustomResponse) => {
-        alert('Server deleted');
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        title: 'Delete Server',
+        message: `Are you sure you want to delete this server: ${server.name} ?`,
       },
-      error: (error: AppError) => {
-        this.servers.splice(index, 0, server);
-        console.log(error.originalError);
-      },
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (!confirmed) {
+        return;
+      }
+
+      this.service
+        .deleteServer(server.id)
+        .pipe(
+          tap((deleted) => {
+            if (deleted) {
+              this.toastrService.success(
+                `Server <${server.name}> deleted`,
+                'SUCCESS'
+              );
+            }
+          })
+        )
+        .subscribe();
     });
   }
 
   openNewServerForm() {
-    this.dialog.open(CreateServerDialogComponent, {
-      width: '500px',
-      data: { title: 'New Server'},
-    }).afterClosed().subscribe((data: Server) => {
-      this.createNewServer(data);
-    })
+    this.dialog
+      .open(CreateServerDialogComponent, {
+        width: '500px',
+        data: { title: 'New Server' },
+      })
+      .afterClosed()
+      .subscribe((data: Server) => {
+        if (data === undefined) {
+          return;
+        }
+
+        this.createNewServer(data);
+      });
+  }
+
+  createNewServer(server: Server) {
+    this.service.createServer(server).subscribe({
+      next: (server) => {
+        if (server) {
+          this.toastrService.success('Server created', 'SUCCESS');
+        }
+      },
+      error: (error: AppError) => {
+        this.toastrService.error(error.originalError, 'ERROR');
+      },
+    });
   }
 }
