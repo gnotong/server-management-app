@@ -23,11 +23,11 @@ export class ServerFormComponent {
     });
   }
 
-  cancel() {
+  cancel() {    
     this.createServerFormCancelEvent.emit();
   }
 
-  submit() {
+  submit() {    
     if(this.form.invalid) {
       this.form.setErrors({invalid: true});
       return;
