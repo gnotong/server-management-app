@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, ErrorHandler, NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -15,6 +15,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { ConfirmationDialogComponent } from './components/dialogs/confirmation-dialog/confirmation-dialog.component';
 import { CreateServerDialogComponent } from './components/dialogs/create-server-dialog/create-server-dialog.component';
 import { ServerFormComponent } from './components/forms/server-form/server-form.component';
+import { CustomErrorHandler } from './errors/custom-error-handler.service';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,12 @@ import { ServerFormComponent } from './components/forms/server-form/server-form.
     }),
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
-  providers: [],
+  providers: [
+    {
+      provide: ErrorHandler,
+      useClass: CustomErrorHandler
+    }
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}
