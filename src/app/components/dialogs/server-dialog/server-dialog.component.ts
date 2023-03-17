@@ -3,13 +3,13 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ServerFormSubmitEventArgs } from '../../forms/server-form/server-form.component';
 
 @Component({
-  selector: 'create-server-dialog',
-  templateUrl: './create-server-dialog.component.html',
-  styleUrls: ['./create-server-dialog.component.css']
+  selector: 'server-dialog',
+  templateUrl: './server-dialog.component.html',
+  styleUrls: ['./server-dialog.component.css']
 })
-export class CreateServerDialogComponent {
+export class ServerDialogComponent {
   constructor(
-    private dialogRef: MatDialogRef<CreateServerDialogComponent>,
+    private dialogRef: MatDialogRef<ServerDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
   ) {
   }
@@ -18,7 +18,7 @@ export class CreateServerDialogComponent {
     this.dialogRef.close();
   }
 
-  onSubmit(event: ServerFormSubmitEventArgs): void {
-    this.dialogRef.close(event.data);
+  onSubmit(event: any): void {
+    this.dialogRef.close(event?.data);
   }
 }

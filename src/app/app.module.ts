@@ -14,7 +14,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { ConfirmationDialogComponent } from './components/dialogs/confirmation-dialog/confirmation-dialog.component';
-import { CreateServerDialogComponent } from './components/dialogs/create-server-dialog/create-server-dialog.component';
+import { ServerDialogComponent } from './components/dialogs/server-dialog/server-dialog.component';
 import { ServerFormComponent } from './components/forms/server-form/server-form.component';
 import { CustomErrorHandler } from './errors/custom-error-handler.service';
 import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
@@ -24,7 +24,7 @@ import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
     AppComponent,
     ServerComponent,
     ServerFormComponent,
-    CreateServerDialogComponent,
+    ServerDialogComponent,
     ConfirmationDialogComponent,
   ],
   imports: [
@@ -36,7 +36,7 @@ import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
-    NgxSpinnerModule.forRoot({type: 'ball-scale-multiple'}),
+    NgxSpinnerModule.forRoot({type: 'ball-newton-cradle'}),
     MatInputModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',

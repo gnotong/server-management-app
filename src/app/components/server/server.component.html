@@ -1,11 +1,11 @@
 <h1>SERVERS</h1>
-<button class="btn btn-primary" (click)="openNewServerForm()">+Add</button>
+<button class="btn btn-primary" (click)="openServerForm()">+Add</button>
 
 <div *ngIf="servers$ | async as servers; else noServers">
   <ul class="list-group">
     <li class="list-group-item" *ngFor="let serv of servers">
       {{ serv.name }}: {{ serv.ipAddress }}
-      <button class="btn btn-info">Show</button>
+      <button class="btn btn-info" (click)="openServerForm(serv)">Edit</button>
       <button class="btn btn-danger" (click)="deleteServer(serv)">
         Delete
       </button>
@@ -17,8 +17,3 @@
     <strong>No servers found.</strong>
   </div>
 </ng-template>
-
-<!-- SPINNER -->
-<ngx-spinner>
-  <p style="color: white">Loading...</p>
-</ngx-spinner>

@@ -6,7 +6,7 @@ import { AppError } from 'src/app/errors/app.error';
 import { Server } from 'src/app/models/server.interface';
 import { ServerService } from 'src/app/services/server.service';
 import { ConfirmationDialogComponent } from '../dialogs/confirmation-dialog/confirmation-dialog.component';
-import { CreateServerDialogComponent } from '../dialogs/create-server-dialog/create-server-dialog.component';
+import { ServerDialogComponent } from '../dialogs/server-dialog/server-dialog.component';
 
 @Component({
   selector: 'app-server',
@@ -62,11 +62,11 @@ export class ServerComponent implements OnInit {
     });
   }
 
-  openNewServerForm() {
+  openServerForm(server?: Server) {
     this.dialog
-      .open(CreateServerDialogComponent, {
+      .open(ServerDialogComponent, {
         width: '500px',
-        data: { title: 'New Server' },
+        data: { title: server ? 'Edit Server' : 'Add server', server: server },
       })
       .afterClosed()
       .subscribe((data: Server) => {
@@ -74,20 +74,24 @@ export class ServerComponent implements OnInit {
           return;
         }
 
-        this.createNewServer(data);
+        this.createUpdateServer(data);
       });
   }
 
-  createNewServer(server: Server) {
-    this.service.createServer(server).subscribe({
-      next: (server) => {
+  createUpdateServer(server: Server) {
+    const create = server.id == undefined;
+    const request = create ? this.service.createServer(server) : this.service.updateServer(server);
+
+    request.subscribe({
+      next: server => {
         if (server) {
-          this.toastrService.success('Server created', 'SUCCESS');
+          const actionMessage = create ? 'created' : 'updated';
+          this.toastrService.success(`Server <${server.ipAddress}> ${actionMessage}`, 'SUCCESS');
         }
       },
-      error: (error: AppError) => {
+      error: (error) => {
         this.toastrService.error(error.originalError, 'ERROR');
-      },
-    });
+      }
+    })
   }
 }

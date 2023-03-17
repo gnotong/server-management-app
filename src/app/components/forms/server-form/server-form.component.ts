@@ -1,30 +1,34 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Status } from 'src/app/enums/status.enum';
 import { Server } from 'src/app/models/server.interface';
 
 @Component({
-  selector: 'create-server-form',
+  selector: 'server-form',
   templateUrl: './server-form.component.html',
   styleUrls: ['./server-form.component.css'],
 })
-export class ServerFormComponent {
-  @Output() createServerFormSubmitEvent = new EventEmitter();
-  @Output() createServerFormCancelEvent = new EventEmitter();
-  form: FormGroup;
+export class ServerFormComponent implements OnInit {
+  @Output() serverFormSubmitEvent = new EventEmitter();
+  @Output() serverFormCancelEvent = new EventEmitter();
+  @Input('server') server!: Server;
+  form!: FormGroup;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder) {}
+
+  ngOnInit(): void {
     this.form = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3)]],
-      ipAddress: ['', Validators.required],
-      type: ['', Validators.required],
-      memory: ['', Validators.required],
-      status: [Status.SERVER_DOWN]
+      id: [this.server?.id, {visibility: 'hidden'}],
+      name: [this.server?.name, [Validators.required, Validators.minLength(3)]],
+      ipAddress: [this.server?.ipAddress, Validators.required],
+      type: [this.server?.type, Validators.required],
+      memory: [this.server?.memory, Validators.required],
+      status: [this.server?.status ?? Status.SERVER_DOWN]
     });
   }
 
-  cancel() {    
-    this.createServerFormCancelEvent.emit();
+  cancel() {
+    this.serverFormCancelEvent.emit();
   }
 
   submit() {    
@@ -32,7 +36,7 @@ export class ServerFormComponent {
       this.form.setErrors({invalid: true});
       return;
     }
-    this.createServerFormSubmitEvent.emit({data: this.form.value});
+    this.serverFormSubmitEvent.emit({data: this.form.value});
   }
 
   get name() {
