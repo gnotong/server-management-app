@@ -2,7 +2,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
-  catchError, map,
+  catchError,
+  map,
   Observable,
   tap,
   throwError
@@ -74,10 +75,27 @@ export class ServerService {
       );
   }
 
-  updateServer(server: Server): Observable<CustomResponse> {
+  updateServer(server: Server): Observable<Server | null> {
     return this.http
-      .put<CustomResponse>(this.baseUrl + `/api/servers${server.id}`, server)
-      .pipe(catchError(this.handleError));
+      .put<CustomResponse>(this.baseUrl + `/api/servers/${server.id}`, server)
+      .pipe(
+        catchError(this.handleError),
+        map((response) => response.data.server ?? null),
+        tap((updateServer) => {
+          if (updateServer) {
+            let servers = this.serversSubject.value;
+
+            let updatedServers = servers.map(server => {
+              if (server.id === updateServer.id) {
+                return updateServer;
+              }
+              return server;
+            });
+
+            this.serversSubject.next(updatedServers);
+          }
+        })
+      );
   }
 
   private handleError(response: HttpErrorResponse) {

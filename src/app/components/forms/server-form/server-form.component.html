@@ -1,5 +1,6 @@
 <form [formGroup]="form" (ngSubmit)="submit()">
   <div class="form-group mb-3">
+    <input formControlName="id" type="hidden" />
       <label for="name">Name</label>
       <input formControlName="name" class="form-control" />
       <div *ngIf="name && name.touched && name.errors">
@@ -62,5 +63,5 @@
     class="btn btn-primary"
     type="submit"
     [disabled]="form.invalid"
-  >Create</button>
+  >Save</button>
 </form>
