@@ -46,19 +46,16 @@ export class ServerComponent implements OnInit {
         return;
       }
 
-      this.service
-        .deleteServer(server.id)
-        .pipe(
-          tap((deleted) => {
-            if (deleted) {
-              this.toastrService.success(
-                `Server <${server.name}> deleted`,
-                'SUCCESS'
-              );
-            }
-          })
-        )
-        .subscribe();
+      this.service.deleteServer(server.id).subscribe({
+        next: (deleted) => {
+          if (deleted) {
+            this.toastrService.success(
+              `Server <${server.name}> deleted`,
+              'SUCCESS'
+            );
+          }
+        },
+      });
     });
   }
 
@@ -80,18 +77,27 @@ export class ServerComponent implements OnInit {
 
   createUpdateServer(server: Server) {
     const create = server.id == undefined;
-    const request = create ? this.service.createServer(server) : this.service.updateServer(server);
+    const request = create
+      ? this.service.createServer(server)
+      : this.service.updateServer(server);
 
     request.subscribe({
-      next: server => {
+      next: (server) => {
         if (server) {
           const actionMessage = create ? 'created' : 'updated';
-          this.toastrService.success(`Server <${server.ipAddress}> ${actionMessage}`, 'SUCCESS');
+          this.toastrService.success(
+            `Server <${server.ipAddress}> ${actionMessage}`,
+            'SUCCESS'
+          );
         }
       },
       error: (error) => {
-        this.toastrService.error(error.originalError, 'ERROR');
-      }
-    })
+        if (error instanceof AppError) {
+          this.toastrService.error(error.originalError, 'ERROR');
+          return;
+        }
+        throw error;
+      },
+    });
   }
 }

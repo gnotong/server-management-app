@@ -10,9 +10,7 @@ export class ConfirmationDialogComponent {
   constructor(
     public dialogRef: MatDialogRef<ConfirmationDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) { 
-    dialogRef.addPanelClass('orange-button')
-  }
+  ) {}
 
   confirm() {
     this.dialogRef.close(true);
