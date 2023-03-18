@@ -59,7 +59,7 @@ export class ServerService {
       );
   }
 
-  createServer(server?: Server): Observable<Server | null> {
+  createServer(server: Server): Observable<Server | null> {
     return this.http
       .post<CustomResponse>(this.baseUrl + `/api/servers`, server)
       .pipe(
