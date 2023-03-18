@@ -5,8 +5,8 @@
   <ul class="list-group">
     <li class="list-group-item" *ngFor="let serv of servers">
       {{ serv.name }}: {{ serv.ipAddress }}
-      <button class="btn btn-info" (click)="openServerForm(serv)">Edit</button>
-      <button class="btn btn-danger" (click)="deleteServer(serv)">
+      <button class="btn btn-info ms-2" (click)="openServerForm(serv)">Edit</button>
+      <button class="btn btn-danger ms-2" (click)="deleteServer(serv)">
         Delete
       </button>
     </li>
