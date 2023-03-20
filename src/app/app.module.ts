@@ -8,14 +8,23 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ServerComponent } from './components/server/server.component';
 
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import {
+  MatFormFieldModule,
+  MAT_FORM_FIELD_DEFAULT_OPTIONS,
+} from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { ToastrModule } from 'ngx-toastr';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { ToastrModule } from 'ngx-toastr';
 import { ConfirmationDialogComponent } from './components/dialogs/confirmation-dialog/confirmation-dialog.component';
 import { ServerDialogComponent } from './components/dialogs/server-dialog/server-dialog.component';
 import { ServerFormComponent } from './components/forms/server-form/server-form.component';
+import { ServerListComponent } from './components/server-list/server-list.component';
 import { CustomErrorHandler } from './errors/custom-error-handler.service';
 import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
 
@@ -26,6 +35,7 @@ import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
     ServerFormComponent,
     ServerDialogComponent,
     ConfirmationDialogComponent,
+    ServerListComponent,
   ],
   imports: [
     BrowserModule,
@@ -36,7 +46,12 @@ import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
     BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
-    NgxSpinnerModule.forRoot({type: 'ball-newton-cradle'}),
+    MatIconModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatButtonModule,
+    MatToolbarModule,
+    NgxSpinnerModule.forRoot({ type: 'ball-newton-cradle' }),
     MatInputModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',
@@ -47,13 +62,17 @@ import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
   providers: [
     {
       provide: ErrorHandler,
-      useClass: CustomErrorHandler
+      useClass: CustomErrorHandler,
     },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: SpinnerInterceptor,
-      multi: true
-    }
+      multi: true,
+    },
+    {
+      provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
+      useValue: { appearance: 'outline' },
+    },
   ],
   bootstrap: [AppComponent],
 })

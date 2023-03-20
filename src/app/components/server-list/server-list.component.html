@@ -1,0 +1,63 @@
+<div class="table-responsive" *ngIf="servers">
+
+    <mat-grid-list cols="2" rowHeight="fit">
+        <mat-grid-tile>
+            <mat-form-field appearance="fill">
+                <mat-label>Filter</mat-label>
+                <input matInput placeholder="Search columns" #input (keyup)="applyFilter($event)" />
+            </mat-form-field>
+        </mat-grid-tile>
+        <mat-grid-tile>
+            <button mat-raised-button class="float-end" color="primary" (click)="create()" title="Add new sever">
+                <mat-icon>add</mat-icon>Add
+            </button>
+            <table mat-table [dataSource]="servers" class="mat-elevation-z8">
+                <ng-container
+                [matColumnDef]="column"
+                *ngFor="let column of displayedColumns">
+                <th mat-header-cell *matHeaderCellDef>{{ column | titlecase }}</th>
+                <td mat-cell *matCellDef="let server">
+                    <ng-container *ngIf="column !== 'actions'; else actionsColumn">
+                        <mat-icon
+                            *ngIf="column === 'status'; else notStatusColumn"
+                            [ngClass]="{
+                            'color-green': server[column].toLowerCase().includes('up'),
+                            'color-red': server[column].toLowerCase().includes('down')
+                            }"
+                        >power_settings_new</mat-icon>
+                        <ng-template #notStatusColumn>
+                            {{ server[column] }}
+                        </ng-template>
+                    </ng-container>
+                    <ng-template #actionsColumn>
+                        <mat-icon
+                            mat-icon-button
+                            (click)="ping(server)"
+                            color="basic"
+                            class="bt"
+                            title="Ping server {{ server.ipAddress }}"
+                        >storage</mat-icon>
+                        <mat-icon
+                            mat-icon-button
+                            (click)="update(server)"
+                            color="primary"
+                            class="bt ms-2"
+                            title="Edit server {{ server.ipAddress }}"
+                        >edit</mat-icon>
+                        <mat-icon
+                            mat-icon-button
+                            (click)="delete(server)"
+                            color="warn"
+                            class="bt ms-2"
+                            title="Delete server {{ server.ipAddress }}"
+                        >delete</mat-icon>
+                    </ng-template>
+                </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let serverRow; columns: displayedColumns"></tr>
+            </table>
+        </mat-grid-tile>
+    </mat-grid-list>
+</div>

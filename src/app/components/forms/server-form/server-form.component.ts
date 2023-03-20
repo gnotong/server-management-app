@@ -58,6 +58,16 @@ export class ServerFormComponent implements OnInit {
   get status() {
     return this.form.get('status');
   }
+
+  getErrorMessage(field: string): string {
+    if (this.form.get(field)?.hasError('required')) {
+      return 'You must enter a value';
+    }
+    if (this.form.get(field)?.hasError('minlength')) {
+      return `minimum length is ${this.name?.errors!['minlength'].requiredLength}`
+    }
+    return '';
+  }
 }
 
 export interface ServerFormSubmitEventArgs {

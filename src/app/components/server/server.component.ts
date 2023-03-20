@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { filter, Observable, of, switchMap, tap } from 'rxjs';
+import { filter, Observable, of, switchMap } from 'rxjs';
 import { AppError } from 'src/app/errors/app.error';
 import { Server } from 'src/app/models/server.interface';
 import { ServerService } from 'src/app/services/server.service';
 import { ConfirmationDialogComponent } from '../dialogs/confirmation-dialog/confirmation-dialog.component';
 import { ServerDialogComponent } from '../dialogs/server-dialog/server-dialog.component';
+import { ServerActionEventArgs } from '../server-list/server-list.component';
 
 @Component({
   selector: 'app-server',
@@ -14,7 +15,7 @@ import { ServerDialogComponent } from '../dialogs/server-dialog/server-dialog.co
   styleUrls: ['./server.component.css'],
 })
 export class ServerComponent implements OnInit {
-  servers$!: Observable<Server[] | undefined>;
+  servers$!: Observable<Server[]>;
 
   constructor(
     private readonly service: ServerService,
@@ -33,7 +34,13 @@ export class ServerComponent implements OnInit {
     });
   }
 
-  deleteServer(server: Server) {
+  deleteServer(eventArgs: ServerActionEventArgs) {
+    if (eventArgs.action.toLowerCase() !== 'delete') {
+      return;
+    }
+
+    const server = eventArgs.server;
+
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       data: {
         title: 'Delete Server',
@@ -41,12 +48,15 @@ export class ServerComponent implements OnInit {
       },
     });
 
-    dialogRef.afterClosed().pipe(
-      filter(confirmed => !!confirmed),
-      switchMap(()=> {
-        return this.service.deleteServer(server.id);
-      })
-    ).subscribe({
+    dialogRef
+      .afterClosed()
+      .pipe(
+        filter((confirmed) => !!confirmed),
+        switchMap(() => {
+          return this.service.deleteServer(server.id);
+        })
+      )
+      .subscribe({
         next: (deleted) => {
           if (deleted) {
             this.toastrService.success(
@@ -58,21 +68,28 @@ export class ServerComponent implements OnInit {
       });
   }
 
-  upsertServer(server?: Server) {
-    const create = server == undefined;
+  upsertServer(eventArgs: ServerActionEventArgs) {
+    if (eventArgs.action.toLowerCase() === 'delete') {
+      return;
+    }
+
+    const create = eventArgs.action.toLowerCase() === 'create';
+    const server = eventArgs.server;
 
     this.dialog
       .open(ServerDialogComponent, {
-        width: '500px',
-        data: { title: server ? 'Edit Server' : 'Add server', server: server },
+        data: { title: create ? 'Add server' : 'Edit Server', server: server },
       })
       .afterClosed()
       .pipe(
         filter((data: Server) => data !== undefined),
         switchMap((serverData: Server) => {
-          return create ? this.service.createServer(serverData) : this.service.updateServer(serverData);
+          return create
+            ? this.service.createServer(serverData)
+            : this.service.updateServer(serverData);
         })
-      ).subscribe({
+      )
+      .subscribe({
         next: (serverResponse) => {
           if (serverResponse) {
             const actionMessage = create ? 'created' : 'updated';

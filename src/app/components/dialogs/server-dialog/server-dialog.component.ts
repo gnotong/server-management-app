@@ -1,6 +1,5 @@
 import { Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { ServerFormSubmitEventArgs } from '../../forms/server-form/server-form.component';
 
 @Component({
   selector: 'server-dialog',

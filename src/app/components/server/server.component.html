@@ -1,19 +1,10 @@
-<h1>SERVERS</h1>
-<button class="btn btn-primary" (click)="upsertServer()">+Add</button>
+<h1>Server management</h1>
 
-<div *ngIf="servers$ | async as servers; else noServers">
-  <ul class="list-group">
-    <li class="list-group-item" *ngFor="let serv of servers">
-      {{ serv.name }}: {{ serv.ipAddress }}
-      <button class="btn btn-info ms-2" (click)="upsertServer(serv)">Edit</button>
-      <button class="btn btn-danger ms-2" (click)="deleteServer(serv)">
-        Delete
-      </button>
-    </li>
-  </ul>
+<div *ngIf="servers$ | async as servers">
+  <server-list 
+  [servers]="servers"
+  (createServerEvent)="upsertServer($event)"
+  (updateServerEvent)="upsertServer($event)"
+  (deleteServerEvent)="deleteServer($event)"
+  ></server-list>
 </div>
-<ng-template #noServers>
-  <div class="alert alert-warning">
-    <strong>No servers found.</strong>
-  </div>
-</ng-template>
