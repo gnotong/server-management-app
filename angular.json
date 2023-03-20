@@ -27,6 +27,7 @@
             "styles": [
               "src/styles.css",
               "src/assets/css/form.css",
+              "src/assets/css/custom.css",
               "node_modules/ngx-spinner/animations/ball-newton-cradle.css"
             ],
             "scripts": []
