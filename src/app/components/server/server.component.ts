@@ -18,18 +18,18 @@ export class ServerComponent implements OnInit {
   servers$!: Observable<Server[]>;
 
   constructor(
-    private readonly service: ServerService,
+    private readonly serverService: ServerService,
     private readonly dialog: MatDialog,
     private readonly toastrService: ToastrService
   ) {}
 
   ngOnInit(): void {
-    this.service.servers$.subscribe({
+    this.serverService.servers$.subscribe({
       next: (servers) => {
         this.servers$ = of(servers);
       },
       error: (error: AppError) => {
-        console.log(error.originalError);
+        throw error;
       },
     });
   }
@@ -53,7 +53,7 @@ export class ServerComponent implements OnInit {
       .pipe(
         filter((confirmed) => !!confirmed),
         switchMap(() => {
-          return this.service.deleteServer(server.id);
+          return this.serverService.deleteServer(server.id);
         })
       )
       .subscribe({
@@ -85,8 +85,8 @@ export class ServerComponent implements OnInit {
         filter((data: Server) => data !== undefined),
         switchMap((serverData: Server) => {
           return create
-            ? this.service.createServer(serverData)
-            : this.service.updateServer(serverData);
+            ? this.serverService.createServer(serverData)
+            : this.serverService.updateServer(serverData);
         })
       )
       .subscribe({
@@ -107,5 +107,31 @@ export class ServerComponent implements OnInit {
           throw error;
         },
       });
+  }
+
+  pingServer(eventArgs: ServerActionEventArgs) {
+    if (eventArgs.action.toLowerCase() !== 'ping') {
+      return;
+    }
+
+    const server = eventArgs.server;
+
+    this.serverService.pingServer(server.ipAddress).subscribe({
+      next: (serverResponse) => {
+        if (serverResponse) {
+          this.toastrService.success(
+            `Ping ${serverResponse.ipAddress}: OK`,
+            'SUCCESS'
+          );
+        }
+      },
+      error: (error) => {
+        if (error instanceof AppError) {
+          this.toastrService.error(error.originalError, 'ERROR');
+          return;
+        }
+        throw error;
+      },
+    });
   }
 }

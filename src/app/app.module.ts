@@ -12,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import {
   MatFormFieldModule,
-  MAT_FORM_FIELD_DEFAULT_OPTIONS,
+  MAT_FORM_FIELD_DEFAULT_OPTIONS
 } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';

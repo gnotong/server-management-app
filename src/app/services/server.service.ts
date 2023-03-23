@@ -28,7 +28,7 @@ export class ServerService {
     this.loadServers();
   }
 
-  private loadServers(): void {
+  public loadServers(): void {
     this.http
       .get<CustomResponse>(this.baseUrl + `/api/servers?limit=${LIMIT}`)
       .pipe(
@@ -51,6 +51,29 @@ export class ServerService {
               const updatedServers = servers?.filter(
                 (server) => server.id !== id
               );
+              this.serversSubject.next(updatedServers);
+            }
+          },
+        }),
+        catchError(this.handleError)
+      );
+  }
+
+  pingServer(ipAddress: string): Observable<Server | null> {
+    return this.http
+      .get<CustomResponse>(this.baseUrl + `/api/servers/ping/${ipAddress}`)
+      .pipe(
+        map((response) => response.data.server ?? null),
+        tap({
+          next: (pingedServer) => {
+            if (pingedServer) {
+              let servers = this.serversSubject.value;
+              let updatedServers = servers.map((server) => {
+                if (server.id === pingedServer.id) {
+                  return pingedServer;
+                }
+                return server;
+              });
               this.serversSubject.next(updatedServers);
             }
           },
@@ -85,7 +108,7 @@ export class ServerService {
           if (updateServer) {
             let servers = this.serversSubject.value;
 
-            let updatedServers = servers.map(server => {
+            let updatedServers = servers.map((server) => {
               if (server.id === updateServer.id) {
                 return updateServer;
               }
