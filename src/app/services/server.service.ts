@@ -1,15 +1,10 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
-  BehaviorSubject,
-  catchError,
-  map,
+  BehaviorSubject, map,
   Observable,
-  tap,
-  throwError
+  tap
 } from 'rxjs';
-import { AppError } from '../errors/app.error';
-import { NotFoundError } from '../errors/not-found.error';
 import { CustomResponse } from '../models/custom-response.interface';
 import { Server } from '../models/server.interface';
 
@@ -28,11 +23,10 @@ export class ServerService {
     this.loadServers();
   }
 
-  private loadServers(): void {
+  public loadServers(): void {
     this.http
       .get<CustomResponse>(this.baseUrl + `/api/servers?limit=${LIMIT}`)
       .pipe(
-        catchError(this.handleError),
         map((response) => response.data.servers ?? []),
         tap((servers) => this.serversSubject.next(servers))
       )
@@ -54,14 +48,36 @@ export class ServerService {
               this.serversSubject.next(updatedServers);
             }
           },
-        }),
-        catchError(this.handleError)
+        })
+      );
+  }
+
+  pingServer(ipAddress: string): Observable<Server | null> {
+    return this.http
+      .get<CustomResponse>(this.baseUrl + `/api/servers/ping/${ipAddress}`)
+      .pipe(
+        map((response) => response.data.server ?? null),
+        tap({
+          next: (pingedServer) => {
+            if (pingedServer) {
+              let servers = this.serversSubject.value;
+              let updatedServers = servers.map((server) => {
+                if (server.id === pingedServer.id) {
+                  return pingedServer;
+                }
+                return server;
+              });
+              this.serversSubject.next(updatedServers);
+            }
+          },
+        })
       );
   }
 
   createServer(server: Server): Observable<Server | null> {
+    
     return this.http
-      .post<CustomResponse>(this.baseUrl + `/api/servers`, server)
+      .post<CustomResponse>(this.baseUrl + `/api/servers`, {})
       .pipe(
         map((response) => response.data.server ?? null),
         tap((serv) => {
@@ -70,8 +86,7 @@ export class ServerService {
             servers?.push(serv);
             this.serversSubject.next(servers);
           }
-        }),
-        catchError(this.handleError)
+        })
       );
   }
 
@@ -79,13 +94,12 @@ export class ServerService {
     return this.http
       .put<CustomResponse>(this.baseUrl + `/api/servers/${server.id}`, server)
       .pipe(
-        catchError(this.handleError),
         map((response) => response.data.server ?? null),
         tap((updateServer) => {
           if (updateServer) {
             let servers = this.serversSubject.value;
 
-            let updatedServers = servers.map(server => {
+            let updatedServers = servers.map((server) => {
               if (server.id === updateServer.id) {
                 return updateServer;
               }
@@ -96,13 +110,5 @@ export class ServerService {
           }
         })
       );
-  }
-
-  private handleError(response: HttpErrorResponse) {
-    if (response.status == 404) {
-      return throwError(() => new NotFoundError(response.error?.message));
-    }
-
-    return throwError(() => new AppError(response.error?.message));
   }
 }

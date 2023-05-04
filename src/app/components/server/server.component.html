@@ -1,10 +1,8 @@
 <h1>Server management</h1>
 
-<div *ngIf="servers$ | async as servers">
-  <server-list 
-  [servers]="servers"
-  (createServerEvent)="upsertServer($event)"
-  (updateServerEvent)="upsertServer($event)"
-  (deleteServerEvent)="deleteServer($event)"
-  ></server-list>
-</div>
+<server-list
+(createServerEvent)="upsertServer($event)"
+(updateServerEvent)="upsertServer($event)"
+(deleteServerEvent)="deleteServer($event)"
+(pingServerEvent)="pingServer($event)"
+></server-list>

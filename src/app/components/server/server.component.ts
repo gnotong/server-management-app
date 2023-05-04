@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { filter, Observable, of, switchMap } from 'rxjs';
+import { filter, switchMap } from 'rxjs';
 import { AppError } from 'src/app/errors/app.error';
 import { Server } from 'src/app/models/server.interface';
 import { ServerService } from 'src/app/services/server.service';
@@ -14,24 +14,23 @@ import { ServerActionEventArgs } from '../server-list/server-list.component';
   templateUrl: './server.component.html',
   styleUrls: ['./server.component.css'],
 })
-export class ServerComponent implements OnInit {
-  servers$!: Observable<Server[]>;
+export class ServerComponent {
 
   constructor(
-    private readonly service: ServerService,
+    private readonly serverService: ServerService,
     private readonly dialog: MatDialog,
     private readonly toastrService: ToastrService
   ) {}
 
-  ngOnInit(): void {
-    this.service.servers$.subscribe({
-      next: (servers) => {
-        this.servers$ = of(servers);
-      },
-      error: (error: AppError) => {
-        console.log(error.originalError);
-      },
-    });
+  generated: boolean = false;
+  changeBackgroundColor: boolean = false;
+  @ViewChild('rand') rand! : ElementRef
+
+  changeBg(): void {
+    this.changeBackgroundColor = true;
+  } 
+  generate(): void {
+    this.generated = true;    
   }
 
   deleteServer(eventArgs: ServerActionEventArgs) {
@@ -53,7 +52,7 @@ export class ServerComponent implements OnInit {
       .pipe(
         filter((confirmed) => !!confirmed),
         switchMap(() => {
-          return this.service.deleteServer(server.id);
+          return this.serverService.deleteServer(server.id);
         })
       )
       .subscribe({
@@ -65,47 +64,65 @@ export class ServerComponent implements OnInit {
             );
           }
         },
+        error: (error) => this.handleError(error),
       });
   }
 
-  upsertServer(eventArgs: ServerActionEventArgs) {
-    if (eventArgs.action.toLowerCase() === 'delete') {
-      return;
-    }
-
-    const create = eventArgs.action.toLowerCase() === 'create';
-    const server = eventArgs.server;
+  upsertServer(server: Server | null) {
 
     this.dialog
       .open(ServerDialogComponent, {
-        data: { title: create ? 'Add server' : 'Edit Server', server: server },
+        data: { title: !server ? 'Add server' : 'Edit Server', server: server },
       })
       .afterClosed()
       .pipe(
         filter((data: Server) => data !== undefined),
         switchMap((serverData: Server) => {
-          return create
-            ? this.service.createServer(serverData)
-            : this.service.updateServer(serverData);
+          return !server
+            ? this.serverService.createServer(serverData)
+            : this.serverService.updateServer(serverData);
         })
       )
       .subscribe({
         next: (serverResponse) => {
           if (serverResponse) {
-            const actionMessage = create ? 'created' : 'updated';
+            const actionMessage = !server ? 'created' : 'updated';
             this.toastrService.success(
               `Server <${serverResponse.ipAddress}> ${actionMessage}`,
               'SUCCESS'
             );
           }
         },
-        error: (error) => {
-          if (error instanceof AppError) {
-            this.toastrService.error(error.originalError, 'ERROR');
-            return;
-          }
-          throw error;
-        },
+        error: (error) => this.handleError(error),
       });
+  }
+
+  pingServer(eventArgs: ServerActionEventArgs) {
+    if (eventArgs.action.toLowerCase() !== 'ping') {
+      return;
+    }
+
+    const server = eventArgs.server;
+
+    this.serverService.pingServer(server.ipAddress).subscribe({
+      next: (serverResponse) => {
+        if (serverResponse) {
+          this.toastrService.success(
+            `Ping ${serverResponse.ipAddress}: OK`,
+            'SUCCESS'
+          );
+        }
+      },
+      error: (error) => this.handleError(error),
+    });
+  }
+
+  handleError(error: any) {
+    if (error instanceof AppError) {
+      this.toastrService.error(error.originalError, 'ERROR');
+      return;
+    }
+
+    throw error;
   }
 }

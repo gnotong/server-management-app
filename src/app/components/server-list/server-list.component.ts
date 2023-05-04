@@ -1,26 +1,35 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Server } from 'src/app/models/server.interface';
+import { ServerService } from 'src/app/services/server.service';
 
 @Component({
   selector: 'server-list',
   templateUrl: './server-list.component.html',
   styleUrls: ['./server-list.component.css']
 })
-export class ServerListComponent {
-  @Input('servers') servers!: Server[]
+export class ServerListComponent implements OnInit {
   @Output('createServerEvent') createServerEvent = new EventEmitter();
   @Output('updateServerEvent') updateServerEvent = new EventEmitter();
   @Output('deleteServerEvent') deleteServerEvent = new EventEmitter();
   @Output('pingServerEvent') pingServerEvent = new EventEmitter();
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
-  displayedColumns: string[] = ['id', 'name', 'ipAddress', 'type', 'memory', 'status', 'actions'];
-  dataSource  = new MatTableDataSource<Server>(this.servers);
+  displayedColumns: string[] = ['name', 'ipAddress', 'type', 'memory', 'status', 'actions'];
+  dataSource = new MatTableDataSource<Server>([]);
 
+  constructor(private readonly serverService: ServerService){}
+
+  ngOnInit() {
+    this.serverService.servers$.subscribe(servers => {
+      this.dataSource.data = servers;
+      this.dataSource.paginator = this.paginator;
+    });
+  }
 
   applyFilter(event: Event) {
     const filteredValue = (event.target as HTMLInputElement).value;
-    console.log(filteredValue);
     this.dataSource.filter = filteredValue.trim().toLowerCase();
   }
 

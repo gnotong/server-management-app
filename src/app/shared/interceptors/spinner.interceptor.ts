@@ -16,7 +16,7 @@ export class SpinnerInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     this.spinner.show();
     return next.handle(request).pipe(
-      delay(5000), // todo: this is for testing only. To be removed
+      // delay(1000), // todo: this is for testing only. To be removed
       finalize(() => this.spinner.hide())
     );
   }
