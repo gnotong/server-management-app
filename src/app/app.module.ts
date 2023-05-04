@@ -27,6 +27,8 @@ import { ServerFormComponent } from './components/forms/server-form/server-form.
 import { ServerListComponent } from './components/server-list/server-list.component';
 import { CustomErrorHandler } from './errors/custom-error-handler.service';
 import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
+import { ErrorInterceptor } from './shared/interceptors/error.interceptor';
+import { ReversePipe } from './shared/pipes/reverse.pipe';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,7 @@ import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
     ServerDialogComponent,
     ConfirmationDialogComponent,
     ServerListComponent,
+    ReversePipe,
   ],
   imports: [
     BrowserModule,
@@ -67,6 +70,11 @@ import { SpinnerInterceptor } from './shared/interceptors/spinner.interceptor';
     {
       provide: HTTP_INTERCEPTORS,
       useClass: SpinnerInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ErrorInterceptor,
       multi: true,
     },
     {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ViewChild } from '@angular/core';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { Server } from 'src/app/models/server.interface';
@@ -10,7 +10,6 @@ import { ServerService } from 'src/app/services/server.service';
   styleUrls: ['./server-list.component.css']
 })
 export class ServerListComponent implements OnInit {
-  @Input('servers') servers!: Server[]
   @Output('createServerEvent') createServerEvent = new EventEmitter();
   @Output('updateServerEvent') updateServerEvent = new EventEmitter();
   @Output('deleteServerEvent') deleteServerEvent = new EventEmitter();
